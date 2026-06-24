@@ -44,3 +44,8 @@ $RECYCLE.BIN/
 **/frontend/yarn-debug.log*
 **/frontend/yarn-error.log*
 **/frontend/.eslintcache
+
+# Local composer files
+/composer.phar
+/composer.bat
+
