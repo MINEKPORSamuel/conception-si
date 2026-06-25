@@ -4,7 +4,7 @@
         "../docker-compose.yml"
     ],
     "service": "backend",
-    "workspaceFolder": "/var/www",
+    "workspaceFolder": "/workspaces/conception-si",
     "forwardPorts": [
         8000,
         5173,
@@ -20,7 +20,7 @@
             "onAutoForward": "ignore"
         }
     },
-    "postCreateCommand": "php artisan migrate --seed",
+    "postCreateCommand": "docker-compose exec -T backend php artisan migrate --seed",
     "customizations": {
         "codespaces": {
             "openFiles": [
