@@ -3,13 +3,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { getProducts } from '../services/products';
 import { buildWhatsAppUrl } from '../services/whatsapp';
-import { resolveLandingPath } from '../utils/access';
+import { resolveLandingPath, isAdmin, isVendor } from '../utils/access';
 
 const fallbackProductImage =
     'https://images.unsplash.com/photo-1550989460-0ad0f5227f45?auto=format&fit=crop&w=1200&q=80';
 
 export default function Catalog() {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -139,7 +139,10 @@ export default function Catalog() {
         setSearchInput('');
     };
 
-    const dashboardPath = resolveLandingPath(user);
+    const handleLogout = async () => {
+        await logout();
+        window.location.reload();
+    };
 
     const uncategorizedCount = products.filter((p) => !p.category).length;
 
@@ -183,9 +186,15 @@ export default function Catalog() {
                     <Link to="/" className="pill-link">
                         Accueil
                     </Link>
-                    <Link to={user ? dashboardPath : '/login'} className="pill-link">
-                        {user ? 'Mon espace' : 'Connexion'}
-                    </Link>
+                    {user ? (
+                        <>
+                            {isAdmin(user) && <Link to="/administration" className="pill-link">Administration</Link>}
+                            {isVendor(user) && <Link to="/vendeur" className="pill-link">Mon Espace Vendeur</Link>}
+                            <button onClick={handleLogout} className="ghost-link">Déconnexion</button>
+                        </>
+                    ) : (
+                        <Link to="/login" className="pill-link">Connexion</Link>
+                    )}
                 </div>
             </header>
 

@@ -24,8 +24,13 @@ class AdminController extends Controller
 
     public function updateRole(Request $request, User $user): JsonResponse
     {
+        // On interdit de toucher au compte admin principal ou de créer un nouvel admin
+        if ($user->email === 'admin@admin.com') {
+            return response()->json(['message' => 'Impossible de modifier le compte administrateur principal.'], 403);
+        }
+
         $data = $request->validate([
-            'role' => ['required', 'string', Rule::in(Role::query()->pluck('name')->all())],
+            'role' => ['required', 'string', Rule::in(['Client', 'Vendeur'])], // On retire 'Admin' des choix possibles
         ]);
 
         $user->syncRoles([$data['role']]);
