@@ -49,3 +49,12 @@ $RECYCLE.BIN/
 /composer.phar
 /composer.bat
 
+# Exclude source code from GitHub (As per user request: "juste l'essentiel")
+# Keeping Dockerfiles and structure, but ignoring the heavy logic folders
+/backend/*
+!/backend/Dockerfile
+/frontend/*
+!/frontend/Dockerfile
+!/doc/
+/doc/*
+

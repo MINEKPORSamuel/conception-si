@@ -1,0 +1,12 @@
+{
+  "name": "conception-si-root",
+  "version": "1.0.0",
+  "scripts": {
+    "start:back": "cd backend && php artisan serve",
+    "start:front": "cd frontend && npm run dev",
+    "dev": "npx concurrently \"npm run start:back\" \"npm run start:front\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
