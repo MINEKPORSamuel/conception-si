@@ -1,0 +1,31 @@
+{
+    "name": "CONCEPTION SI - Marketplace",
+    "dockerComposeFile": [
+        "../docker-compose.yml"
+    ],
+    "service": "backend",
+    "workspaceFolder": "/var/www",
+    "forwardPorts": [
+        8000,
+        5173,
+        3306
+    ],
+    "portsAttributes": {
+        "5173": {
+            "label": "Frontend (Site)",
+            "onAutoForward": "openBrowser"
+        },
+        "8000": {
+            "label": "Backend (API)",
+            "onAutoForward": "ignore"
+        }
+    },
+    "postCreateCommand": "php artisan migrate --seed",
+    "customizations": {
+        "codespaces": {
+            "openFiles": [
+                "README.md"
+            ]
+        }
+    }
+}

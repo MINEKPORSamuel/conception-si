@@ -23,8 +23,17 @@ Les documents de conception sont disponibles dans le dossier `/doc` :
 - [📄 Cahier d'Analyse](./doc/2_Cahier_dAnalyse_v2.pdf)
 - [📊 Diagrammes de Conception](./doc/diagrammes/)
 
-## 🐳 Lancement Rapide (Docker)
-Pour lancer l'intégralité de la plateforme en une seule commande :
+## 🐳 Lancement Rapide
+
+### ☁️ Dans le Cloud (Zéro Installation)
+Vous pouvez lancer l'intégralité du projet directement dans votre navigateur via GitHub Codespaces :
+1. Cliquez sur le bouton vert **"Code"** en haut à droite.
+2. Allez dans l'onglet **"Codespaces"**.
+3. Cliquez sur **"Create codespace on main"**.
+4. Attendez que l'environnement se construise (environ 2 min). Le site s'ouvrira automatiquement !
+
+### 💻 En Local (Docker)
+Pour lancer l'intégralité de la plateforme sur votre machine :
 
 ```bash
 docker-compose up -d --build
