@@ -18,9 +18,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware(['auth:sanctum', 'role:Vendeur|Admin'])->group(function () {
     Route::get('/vendor/products', [ProductController::class, 'manage']);
-});
-
-Route::middleware(['auth:sanctum', 'vendor.approved', 'role:Vendeur|Admin'])->group(function () {
     Route::post('/vendor/products', [ProductController::class, 'store']);
     Route::patch('/vendor/products/{product}', [ProductController::class, 'update']);
     Route::delete('/vendor/products/{product}', [ProductController::class, 'destroy']);

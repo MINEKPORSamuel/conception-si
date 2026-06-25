@@ -35,7 +35,7 @@ class AuthController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'vendor_status' => $data['role'] === 'Vendeur' ? 'pending' : null,
+            'vendor_status' => $data['role'] === 'Vendeur' ? 'approved' : null,
         ]);
 
         $user->assignRole($data['role']);

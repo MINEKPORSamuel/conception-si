@@ -95,9 +95,6 @@ export default function Register() {
                             <option value="Client">Client</option>
                             <option value="Vendeur">Vendeur</option>
                         </select>
-                        <small className="section-note">
-                            Le profil Vendeur est soumis à validation par l’administrateur avant l’accès à l’espace vendeur.
-                        </small>
                     </div>
 
                     <div className="form-group">

@@ -61,9 +61,7 @@ export default function AdminDashboard() {
             users: users.length,
             admins: roles.Admin || 0,
             vendors: roles.Vendeur || 0,
-            pendingVendors: users.filter((current) => current.vendor_status === 'pending').length,
             products: products.length,
-            pendingProducts: products.filter((product) => product.publication_status === 'pending').length,
         };
     }, [products.length, users]);
 
@@ -150,7 +148,7 @@ export default function AdminDashboard() {
                 <div className="welcome-banner">
                     <h2>Administration</h2>
                     <p>
-                        {user?.name || user?.email} supervise les comptes, valide les vendeurs et modère les produits publiés.
+                        {user?.name || user?.email} supervise les comptes et gère la plateforme.
                     </p>
                 </div>
 
@@ -171,19 +169,9 @@ export default function AdminDashboard() {
                         <p>Vendeurs</p>
                     </article>
                     <article className="feature-card soft">
-                        <div className="card-icon">⏱️</div>
-                        <h3>{stats.pendingVendors}</h3>
-                        <p>Vendeurs en attente</p>
-                    </article>
-                    <article className="feature-card soft">
                         <div className="card-icon">📦</div>
                         <h3>{stats.products}</h3>
                         <p>Produits</p>
-                    </article>
-                    <article className="feature-card soft">
-                        <div className="card-icon">⏳</div>
-                        <h3>{stats.pendingProducts}</h3>
-                        <p>Produits en attente</p>
                     </article>
                 </section>
 
@@ -214,7 +202,6 @@ export default function AdminDashboard() {
                                         <div>
                                             <h3>{account.name}</h3>
                                             <p className="section-note">{account.email}</p>
-                                            <p className="section-note">Statut vendeur: {account.vendor_status || 'aucun'}</p>
                                         </div>
                                     </div>
 
@@ -249,7 +236,7 @@ export default function AdminDashboard() {
 
                         <div className="compact-grid">
                             {users
-                                .filter((account) => account.role === 'Vendeur' || account.vendor_status)
+                                .filter((account) => account.role === 'Vendeur')
                                 .map((account) => (
                                     <article
                                         key={`vendor-${account.id}`}
@@ -261,32 +248,7 @@ export default function AdminDashboard() {
                                             <div>
                                                 <h3>{account.name}</h3>
                                                 <p className="section-note">{account.email}</p>
-                                                <span className={`product-category ${account.vendor_status === 'approved' ? '' : 'warning'}`} style={{
-                                                    background: account.vendor_status === 'approved' ? '#e6f2eb' : account.vendor_status === 'rejected' ? '#fcefe9' : '#fff4e5',
-                                                    color: account.vendor_status === 'approved' ? '#0f5b44' : account.vendor_status === 'rejected' ? '#b04a3d' : '#a76b00',
-                                                }}>
-                                                    {account.vendor_status || 'aucun'}
-                                                </span>
                                             </div>
-                                        </div>
-
-                                        <div className="card-actions" onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                                type="button"
-                                                className={account.vendor_status === 'approved' ? 'submit-btn' : 'hero-secondary-btn'}
-                                                onClick={() => handleVendorStatusChange(account.id, 'approved')}
-                                                disabled={savingUserId === account.id}
-                                            >
-                                                Valider
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={account.vendor_status === 'rejected' ? 'submit-btn' : 'hero-secondary-btn'}
-                                                onClick={() => handleVendorStatusChange(account.id, 'rejected')}
-                                                disabled={savingUserId === account.id}
-                                            >
-                                                Refuser
-                                            </button>
                                         </div>
                                     </article>
                                 ))}
@@ -353,10 +315,10 @@ export default function AdminDashboard() {
                     <section className="section-card">
                         <div className="section-toolbar">
                             <div>
-                                <span className="section-kicker">Publications</span>
-                                <h2>Valider ou refuser un produit</h2>
+                                <span className="section-kicker">Articles</span>
+                                <h2>Modération du catalogue</h2>
                                 <p className="section-note">
-                                    Les produits en attente ne sont pas visibles sur le catalogue public.
+                                    Consultez et gérez l'ensemble des produits enregistrés sur la plateforme.
                                 </p>
                             </div>
                         </div>
@@ -370,7 +332,6 @@ export default function AdminDashboard() {
                                             <p className="product-category">{product.category || 'Catégorie non renseignée'}</p>
                                             <p className="section-note">{product.description}</p>
                                         </div>
-                                        <span className="section-kicker">{product.publication_status || 'pending'}</span>
                                     </div>
 
                                     <div className="price-row">
@@ -382,26 +343,19 @@ export default function AdminDashboard() {
                                         <button
                                             type="button"
                                             className={product.publication_status === 'approved' ? 'submit-btn' : 'hero-secondary-btn'}
-                                            onClick={() => handlePublicationChange(product.id, 'approved')}
+                                            onClick={() => handlePublicationChange(product.id, product.publication_status === 'approved' ? 'rejected' : 'approved')}
                                             disabled={savingProductId === product.id}
                                         >
-                                            Valider
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={product.publication_status === 'rejected' ? 'submit-btn' : 'hero-secondary-btn'}
-                                            onClick={() => handlePublicationChange(product.id, 'rejected')}
-                                            disabled={savingProductId === product.id}
-                                        >
-                                            Refuser
+                                            {product.publication_status === 'approved' ? 'Masquer du catalogue' : 'Rendre visible'}
                                         </button>
                                         <button
                                             type="button"
                                             className="hero-secondary-btn"
-                                            onClick={() => handlePublicationChange(product.id, 'pending')}
+                                            style={{ background: '#b04a3d', color: 'white' }}
+                                            onClick={() => handleDeleteProduct(product.id)}
                                             disabled={savingProductId === product.id}
                                         >
-                                            En attente
+                                            Supprimer définitivement
                                         </button>
                                     </div>
                                 </article>

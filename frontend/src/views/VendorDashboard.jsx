@@ -203,17 +203,6 @@ export default function VendorDashboard() {
                                             <div>
                                                 <h3>{product.name}</h3>
                                                 <p className="product-category">{product.category || 'Sans catégorie'}</p>
-                                                <div className="status-badge" style={{
-                                                    fontSize: '0.7rem',
-                                                    padding: '2px 8px',
-                                                    borderRadius: '999px',
-                                                    background: product.publication_status === 'approved' ? '#e6f2eb' : '#fff4e5',
-                                                    color: product.publication_status === 'approved' ? '#0f5b44' : '#a76b00',
-                                                    marginTop: '4px',
-                                                    display: 'inline-block'
-                                                }}>
-                                                    {product.publication_status === 'approved' ? 'En ligne' : 'En attente'}
-                                                </div>
                                             </div>
 
                                             <div className="price-row">
