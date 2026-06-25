@@ -49,12 +49,19 @@ $RECYCLE.BIN/
 /composer.phar
 /composer.bat
 
-# Exclude source code from GitHub (As per user request: "juste l'essentiel")
-# Keeping Dockerfiles and structure, but ignoring the heavy logic folders
-/backend/*
-!/backend/Dockerfile
-/frontend/*
-!/frontend/Dockerfile
-!/doc/
-/doc/*
+# Local composer files
+/composer.phar
+/composer.bat
+
+# Inclusion du code source pour permettre le fonctionnement de Codespaces
+# Mais on garde les dossiers lourds et sensibles exclus
+**/node_modules/
+**/vendor/
+**/.env
+**/storage/*.key
+**/storage/framework/cache/data/*
+**/storage/framework/sessions/*
+**/storage/framework/views/*.php
+**/storage/logs/*.log
+**/frontend/dist/
 
