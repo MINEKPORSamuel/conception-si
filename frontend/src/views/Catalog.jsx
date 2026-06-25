@@ -6,7 +6,7 @@ import { buildWhatsAppUrl } from '../services/whatsapp';
 import { resolveLandingPath, isAdmin, isVendor } from '../utils/access';
 
 const fallbackProductImage =
-    'https://images.unsplash.com/photo-1550989460-0ad0f5227f45?auto=format&fit=crop&w=1200&q=80';
+    'https://images.unsplash.com/photo-1550989460-0ad0f5227f45?auto=format&fit=crop&w=600&q=75';
 
 export default function Catalog() {
     const { user, logout } = useAuth();
@@ -34,7 +34,8 @@ export default function Catalog() {
             try {
                 const data = await getProducts();
                 if (mounted) {
-                    setProducts(data);
+                    // On gère la pagination du backend (data.data contient les items)
+                    setProducts(Array.isArray(data) ? data : (data.data || []));
                 }
             } catch {
                 if (mounted) {

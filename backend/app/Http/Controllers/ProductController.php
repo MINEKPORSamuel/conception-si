@@ -15,7 +15,7 @@ class ProductController extends Controller
             ->where('is_active', true)
             ->where('publication_status', 'approved')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(12); // Pagination pour la performance
 
         return response()->json($products);
     }
