@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { isAdmin, isApprovedVendor, isPendingVendor } from '../utils/access';
+import { isAdmin, isVendor } from '../utils/access';
 
 export default function Account() {
     const { user, logout } = useAuth();
@@ -12,9 +12,6 @@ export default function Account() {
         await logout();
         navigate('/');
     };
-
-    const vendorIsPending = isPendingVendor(user);
-    const vendorIsApproved = isApprovedVendor(user);
 
     return (
         <div className="page-shell">
@@ -45,34 +42,28 @@ export default function Account() {
 
                 {location.state?.notice && <div className="error-alert">{location.state.notice}</div>}
 
-                {vendorIsPending && (
-                    <div className="error-alert">
-                        Votre compte vendeur est en attente de validation par l’administrateur. Vous pouvez continuer à utiliser
-                        votre compte, mais l’espace vendeur restera verrouillé jusqu’à approbation.
-                    </div>
-                )}
-
                 <section className="compact-grid">
-                    <article className="feature-card soft">
-                        <div className="card-icon">🧾</div>
-                        <h3>Mon compte</h3>
-                        <p>Consultez vos informations de profil et votre statut d’accès.</p>
-                    </article>
-                    <article className="feature-card soft">
-                        <div className="card-icon">📦</div>
-                        <h3>Mes produits</h3>
-                        <p>Créez et suivez vos produits selon votre rôle utilisateur.</p>
-                    </article>
-                    <article className="feature-card soft">
-                        <div className="card-icon">🔎</div>
-                        <h3>Catalogue</h3>
-                        <p>Accédez au catalogue public et parcourez les articles visibles.</p>
-                    </article>
-                    <article className="feature-card soft">
-                        <div className="card-icon">💬</div>
-                        <h3>Statut vendeur</h3>
-                        <p>Vérifiez si votre accès vendeur est approuvé, en attente ou refusé.</p>
-                    </article>
+                    {isAdmin(user) && (
+                        <article className="feature-card soft" style={{ cursor: 'pointer' }} onClick={() => navigate('/administration')}>
+                            <div className="card-icon">🛡️</div>
+                            <h3>Administration</h3>
+                            <p>Gérer les utilisateurs et les produits de la plateforme.</p>
+                        </article>
+                    )}
+                    {(isAdmin(user) || isVendor(user)) && (
+                        <>
+                        <article className="feature-card soft" style={{ cursor: 'pointer' }} onClick={() => navigate('/vendeur')}>
+                            <div className="card-icon">📦</div>
+                            <h3>Mes produits</h3>
+                            <p>Créez et suivez vos produits dans votre espace vendeur.</p>
+                        </article>
+                        <article className="feature-card soft" style={{ cursor: 'pointer' }} onClick={() => navigate('/catalogue')}>
+                            <div className="card-icon">🔎</div>
+                            <h3>Catalogue</h3>
+                            <p>Accédez au catalogue public et parcourez les articles visibles.</p>
+                        </article>
+                        </>
+                    )}
                 </section>
 
                 <section className="section-card">
@@ -82,11 +73,11 @@ export default function Account() {
                         Votre session est active. Vous pouvez naviguer sur le site et ouvrir les espaces auxquels vous avez droit.
                     </p>
                     <div className="card-actions" style={{ marginTop: '18px' }}>
-                        {vendorIsApproved || isAdmin(user) ? (
+                        {(isVendor(user) || isAdmin(user)) && (
                             <Link to="/vendeur" className="hero-secondary-btn">
                                 Aller à l’espace vendeur
                             </Link>
-                        ) : null}
+                        )}
                         {isAdmin(user) ? (
                             <Link to="/administration" className="submit-btn">
                                 Aller à l’administration

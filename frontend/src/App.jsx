@@ -33,7 +33,7 @@ function App() {
                             <Route
                                 path="/compte"
                                 element={
-                                    <ProtectedRoute>
+                                    <ProtectedRoute roles={['Vendeur', 'Admin']}>
                                         <Account />
                                     </ProtectedRoute>
                                 }
