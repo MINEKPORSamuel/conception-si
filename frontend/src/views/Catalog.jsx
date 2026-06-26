@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { getProducts } from '../services/products';
+import { extractProductItems, getProducts } from '../services/products';
 import { buildWhatsAppUrl } from '../services/whatsapp';
 import { resolveLandingPath, isAdmin, isVendor } from '../utils/access';
 
@@ -32,10 +32,19 @@ export default function Catalog() {
 
         const loadProducts = async () => {
             try {
-                const data = await getProducts();
+                const params = {};
+
+                if (initialQuery) {
+                    params.search = initialQuery;
+                }
+
+                if (initialCategory && initialCategory !== 'all') {
+                    params.category = initialCategory;
+                }
+
+                const data = await getProducts(params);
                 if (mounted) {
-                    // On gère la pagination du backend (data.data contient les items)
-                    setProducts(Array.isArray(data) ? data : (data.data || []));
+                    setProducts(extractProductItems(data));
                 }
             } catch {
                 if (mounted) {
@@ -53,7 +62,7 @@ export default function Catalog() {
         return () => {
             mounted = false;
         };
-    }, []);
+    }, [location.search]);
 
     // Catégories dynamiques extraites des produits
     const categories = useMemo(() => {

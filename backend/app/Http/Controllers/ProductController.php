@@ -9,13 +9,28 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        $perPage = (int) $request->query('per_page', 12);
+        $perPage = max(1, min(60, $perPage));
+
+        $search = trim((string) $request->query('search', ''));
+        $category = trim((string) $request->query('category', ''));
+
         $products = Product::query()
             ->where('is_active', true)
             ->where('publication_status', 'approved')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query
+                        ->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('description', 'like', '%'.$search.'%')
+                        ->orWhere('category', 'like', '%'.$search.'%');
+                });
+            })
+            ->when($category !== '', fn ($query) => $query->where('category', $category))
             ->orderBy('created_at', 'desc')
-            ->paginate(12); // Pagination pour la performance
+            ->paginate($perPage);
 
         return response()->json($products);
     }
@@ -29,10 +44,13 @@ class ProductController extends Controller
         return response()->json($product);
     }
 
-    public function manage(): JsonResponse
+    public function manage(Request $request): JsonResponse
     {
+        $user = $request->user();
+
         $products = Product::query()
             ->with('user')
+            ->when(! $user->hasRole('Admin'), fn ($query) => $query->where('user_id', $user->id))
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -80,6 +98,12 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): JsonResponse
     {
+        $user = $request->user();
+
+        if (! $user->hasRole('Admin') && $product->user_id !== $user->id) {
+            return response()->json(['message' => 'Accès interdit.'], 403);
+        }
+
         $data = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255'],
@@ -140,6 +164,12 @@ class ProductController extends Controller
 
     public function destroy(Product $product): JsonResponse
     {
+        $user = request()->user();
+
+        if (! $user || (! $user->hasRole('Admin') && $product->user_id !== $user->id)) {
+            return response()->json(['message' => 'Accès interdit.'], 403);
+        }
+
         $product->delete();
 
         return response()->json(['message' => 'Produit supprimé.']);

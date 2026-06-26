@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Spatie\Permission\Models\Role;
 
 class AdminController extends Controller
 {
@@ -24,9 +23,8 @@ class AdminController extends Controller
 
     public function updateRole(Request $request, User $user): JsonResponse
     {
-        // On interdit de toucher au compte admin principal ou de créer un nouvel admin
-        if ($user->email === 'admin@admin.com') {
-            return response()->json(['message' => 'Impossible de modifier le compte administrateur principal.'], 403);
+        if ($user->hasRole('Admin')) {
+            return response()->json(['message' => 'Impossible de rétrograder un administrateur.'], 403);
         }
 
         $data = $request->validate([
@@ -42,6 +40,10 @@ class AdminController extends Controller
 
     public function updateVendorStatus(Request $request, User $user): JsonResponse
     {
+        if ($user->hasRole('Admin')) {
+            return response()->json(['message' => 'Impossible de modifier un administrateur.'], 403);
+        }
+
         $data = $request->validate([
             'vendor_status' => ['required', 'string', Rule::in(['pending', 'approved', 'rejected'])],
         ]);

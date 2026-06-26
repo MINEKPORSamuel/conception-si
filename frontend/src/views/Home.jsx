@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { getProducts } from '../services/products';
+import { extractProductItems, getProducts } from '../services/products';
 import { buildWhatsAppUrl } from '../services/whatsapp';
 import { resolveLandingPath } from '../utils/access';
 
@@ -26,9 +26,9 @@ export default function Home() {
 
         const loadProducts = async () => {
             try {
-                const data = await getProducts();
+                const data = await getProducts({ per_page: 12 });
                 if (mounted) {
-                    setProducts(data);
+                    setProducts(extractProductItems(data));
                 }
             } catch {
                 if (mounted) {
