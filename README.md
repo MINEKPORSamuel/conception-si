@@ -1,48 +1,111 @@
-# CONCEPTION SI - Marketplace Multiservices 🚀
+# Marché Libre — Marketplace Multiservices 🛍️
 
-Bienvenue sur le dépôt du projet **CONCEPTION SI**. Ce projet consiste en la conception et le développement d'une plateforme de marketplace moderne, permettant la mise en relation entre vendeurs et clients avec une modération administrative robuste.
+> Projet réalisé dans le cadre de l'UE **Conception de Systèmes d'Information** — v1.0 stable
 
-## 📌 Présentation du Projet
-Ce système d'information a été conçu pour répondre aux besoins de digitalisation des échanges commerciaux, offrant une interface intuitive pour les vendeurs et une sécurité accrue pour les acheteurs via un système de validation des publications.
+Plateforme de marketplace moderne permettant la mise en relation entre vendeurs et clients, avec une modération administrative robuste et une recherche intelligente tolérante aux fautes de frappe.
 
-### 🔑 Fonctionnalités Clés
-- **Espace Administrateur** : Gestion des utilisateurs, validation des statuts "Vendeur", et modération des produits.
-- **Espace Vendeur** : Gestion de catalogue, ajout de produits avec images, et suivi des stocks.
-- **Catalogue Public** : Recherche intelligente (Tolérance aux fautes via Levenshtein), filtrage par catégories dynamiques.
-- **Contact Direct** : Intégration WhatsApp pour faciliter les transactions.
+---
+
+## 📌 Présentation
+
+Ce système d'information répond aux besoins de digitalisation des échanges commerciaux. Il offre une interface intuitive pour les vendeurs, une sécurité accrue pour les acheteurs via un système de validation des publications, et un contact direct par WhatsApp.
+
+### 🔑 Fonctionnalités
+
+| Espace | Fonctionnalités |
+|---|---|
+| 🌍 **Public** | Catalogue, recherche intelligente (Levenshtein), filtrage par catégories, fiche produit, contact WhatsApp |
+| 🏪 **Vendeur** | Tableau de bord, CRUD produits, upload d'image, suivi des stocks |
+| 🛡️ **Admin** | Gestion des rôles, validation vendeurs, modération des publications, statistiques globales |
+
+---
 
 ## 🛠 Stack Technique
-- **Backend** : Laravel 11 (PHP 8.2+) avec Sanctum pour l'authentification API.
-- **Frontend** : React.js avec Vite, Tailwind CSS pour une interface fluide et responsive.
-- **Base de données** : MySQL.
-- **Conteneurisation** : Docker & Docker Compose.
 
-## 📂 Documentation & Analyse
-Les documents de conception sont disponibles dans le dossier `/doc` :
-- [📄 Cahier des Charges](./doc/1_Cahier_des_Charges_v2.pdf)
-- [📄 Cahier d'Analyse](./doc/2_Cahier_dAnalyse_v2.pdf)
-- [📊 Diagrammes de Conception](./doc/diagrammes/)
+| Couche | Technologie |
+|---|---|
+| **Backend** | Laravel 12 (PHP 8.2+) |
+| **Authentification** | Laravel Sanctum (token Bearer) |
+| **Rôles & Permissions** | Spatie Laravel Permission |
+| **Frontend** | React 18 + Vite |
+| **Style** | Tailwind CSS + CSS personnalisé |
+| **Base de données** | MySQL 8.0 |
+| **Conteneurisation** | Docker & Docker Compose |
+
+---
+
+## 📂 Documentation
+
+| Document | Lien |
+|---|---|
+| 📄 Cahier des Charges | [1_Cahier_des_Charges_v2.pdf](./doc/1_Cahier_des_Charges_v2.pdf) |
+| 📄 Cahier d'Analyse | [2_Cahier_dAnalyse_v2.pdf](./doc/2_Cahier_dAnalyse_v2.pdf) |
+| 📊 Diagrammes UML & MCD/MLD | [/doc/diagrammes/](./doc/diagrammes/) |
+| 📝 Rapport de projet | [Marche_Libre_Rapport.docx](./doc/Marche_Libre_Rapport.docx) |
+| 🗂️ Flashcards de révision | [flashcard.html](./doc/flashcard.html) |
+
+---
 
 ## 🐳 Lancement Rapide
 
 ### ☁️ Dans le Cloud (Zéro Installation)
-Vous pouvez lancer l'intégralité du projet directement dans votre navigateur via GitHub Codespaces :
+
+Lancez le projet directement dans votre navigateur via **GitHub Codespaces** :
 1. Cliquez sur le bouton vert **"Code"** en haut à droite.
 2. Allez dans l'onglet **"Codespaces"**.
 3. Cliquez sur **"Create codespace on main"**.
-4. Attendez que l'environnement se construise (environ 2 min). Le site s'ouvrira automatiquement !
+4. Attendez ~2 min. Le site s'ouvre automatiquement !
 
 ### 💻 En Local (Docker)
-Pour lancer l'intégralité de la plateforme sur votre machine :
 
 ```bash
 docker-compose up -d --build
 ```
 
-Une fois lancé :
-- **Frontend** : `http://localhost:5173`
-- **Backend API** : `http://localhost:8000`
-- **Documentation API** : `http://localhost:8000/api`
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:8000/api |
 
 ---
-*Projet réalisé dans le cadre de l'UE Conception de Systèmes d'Information.*
+
+## 🔑 Compte Administrateur par Défaut
+
+Un seeder crée automatiquement le compte admin au premier lancement :
+
+```
+Email    : admin@marche-libre.com
+Password : Admin@1234
+```
+
+> ⚠️ Pensez à changer le mot de passe en production.
+
+---
+
+## 📁 Structure du Projet
+
+```
+CONCEPTION-SI/
+├── backend/          # API Laravel 12
+│   ├── app/
+│   │   ├── Http/Controllers/   # AuthController, ProductController, AdminController
+│   │   └── Models/             # User, Product
+│   ├── database/
+│   │   └── migrations/         # 10 migrations
+│   └── routes/api.php          # Routes API REST
+├── frontend/         # SPA React + Vite
+│   └── src/
+│       ├── views/              # 10 pages (Home, Catalog, Dashboard...)
+│       ├── components/         # ProtectedRoute
+│       ├── context/            # AuthContext
+│       └── services/           # Appels API
+├── doc/              # Documentation complète
+│   ├── diagrammes/             # 9 diagrammes UML + MCD/MLD
+│   ├── flashcard.html          # Flashcards de révision
+│   └── Marche_Libre_Rapport.docx
+└── docker-compose.yml          # Orchestration 3 services
+```
+
+---
+
+*v1.0 — Juin 2026*
