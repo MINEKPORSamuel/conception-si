@@ -16,12 +16,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Création des rôles indispensables au fonctionnement du système
-        foreach (['Admin', 'Client', 'Vendeur'] as $roleName) {
-            Role::firstOrCreate([
-                'name' => $roleName,
-                'guard_name' => 'web',
-            ]);
-        }
+        // Création des rôles
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Vendeur', 'guard_name' => 'web']);
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Client', 'guard_name' => 'web']);
+
+        // Création d'un administrateur par défaut
+        $admin = \App\Models\User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'Administrateur',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            ]
+        );
+
+        $admin->syncRoles(['Admin']);
     }
 }

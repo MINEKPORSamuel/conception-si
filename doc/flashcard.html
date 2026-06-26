@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashcards — Marché Libre</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f17;
+    --surface: #161a27;
+    --surface2: #1e2336;
+    --border: #2a2f45;
+    --brand: #6366f1;
+    --brand2: #8b5cf6;
+    --accent: #06b6d4;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --card-h: 380px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    width: 100%;
+    max-width: 860px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--brand), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  header p { color: var(--muted); font-size: 0.9rem; }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+
+  .stat-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-chip .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── FILTERS ── */
+  .filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 28px;
+    max-width: 860px;
+  }
+
+  .filter-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 7px 18px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .filter-btn:hover { border-color: var(--brand); color: var(--text); }
+  .filter-btn.active {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: #fff;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 24px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand), var(--accent));
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── CARD SCENE ── */
+  .scene {
+    width: 100%;
+    max-width: 620px;
+    height: var(--card-h);
+    perspective: 1200px;
+    cursor: pointer;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 20px;
+    padding: 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .card-front {
+    background: linear-gradient(145deg, var(--surface), var(--surface2));
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(145deg, #1a1040, #0d1a30);
+    box-shadow: 0 20px 60px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+    border-color: rgba(99,102,241,0.3);
+    text-align: left;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 28px;
+  }
+
+  .card-category {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+  }
+
+  .card-question {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .card-hint {
+    margin-top: 20px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-hint::before { content: '👆'; }
+
+  .back-category {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+
+  .back-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.35;
+  }
+
+  .back-content {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: #cbd5e1;
+    width: 100%;
+  }
+
+  .back-content strong { color: var(--text); font-weight: 600; }
+  .back-content em { color: var(--accent); font-style: normal; }
+
+  .back-content ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 10px;
+  }
+
+  .back-content ul li {
+    padding: 4px 0;
+    padding-left: 18px;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .back-content ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--brand);
+    font-size: 0.8rem;
+  }
+
+  .back-content code {
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.2);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82em;
+    color: #a5b4fc;
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn:hover { border-color: var(--brand); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand2));
+    border-color: transparent;
+    color: #fff;
+  }
+
+  .btn-primary:hover { box-shadow: 0 8px 24px rgba(99,102,241,0.4); }
+
+  .card-counter {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* ── SHUFFLE / RESET ── */
+  .actions-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── CATEGORY COLORS ── */
+  .cat-backend   { background: rgba(239,68,68,0.15); color: #f87171; }
+  .cat-frontend  { background: rgba(6,182,212,0.15); color: #22d3ee; }
+  .cat-database  { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .cat-archi     { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+  .cat-securite  { background: rgba(16,185,129,0.15); color: #34d399; }
+  .cat-devops    { background: rgba(139,92,246,0.15); color: #c4b5fd; }
+  .cat-conception { background: rgba(236,72,153,0.15); color: #f9a8d4; }
+  .cat-algo      { background: rgba(249,115,22,0.15); color: #fb923c; }
+
+  /* ── KNOWN/UNKNOWN ── */
+  .rating-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .btn-known {
+    flex: 1;
+    background: rgba(16,185,129,0.15);
+    border-color: rgba(16,185,129,0.3);
+    color: var(--green);
+    justify-content: center;
+  }
+
+  .btn-known:hover { background: rgba(16,185,129,0.25); border-color: var(--green); }
+
+  .btn-unknown {
+    flex: 1;
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.2);
+    color: var(--red);
+    justify-content: center;
+  }
+
+  .btn-unknown:hover { background: rgba(239,68,68,0.2); border-color: var(--red); }
+
+  /* ── SCORE ── */
+  .score-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .score-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 20px;
+    text-align: center;
+    font-size: 0.78rem;
+  }
+
+  .score-item strong { display: block; font-size: 1.3rem; font-weight: 800; }
+  .score-item.known strong { color: var(--green); }
+  .score-item.unknown strong { color: var(--red); }
+  .score-item.remain strong { color: var(--accent); }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 1.5rem; }
+    .card-question { font-size: 1.1rem; }
+    :root { --card-h: 420px; }
+    .card-back { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗂️ Flashcards — Marché Libre</h1>
+  <p>Clique sur une carte pour révéler la réponse · Note-toi honnêtement</p>
+</header>
+
+<div class="stats-bar">
+  <div class="stat-chip"><div class="dot" style="background:#f87171"></div>Backend</div>
+  <div class="stat-chip"><div class="dot" style="background:#22d3ee"></div>Frontend</div>
+  <div class="stat-chip"><div class="dot" style="background:#fbbf24"></div>Base de données</div>
+  <div class="stat-chip"><div class="dot" style="background:#a5b4fc"></div>Architecture</div>
+  <div class="stat-chip"><div class="dot" style="background:#34d399"></div>Sécurité</div>
+  <div class="stat-chip"><div class="dot" style="background:#c4b5fd"></div>DevOps</div>
+  <div class="stat-chip"><div class="dot" style="background:#f9a8d4"></div>Conception</div>
+  <div class="stat-chip"><div class="dot" style="background:#fb923c"></div>Algorithme</div>
+</div>
+
+<div class="filters" id="filters"></div>
+
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span id="progress-text">Carte 1 sur 45</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+</div>
+
+<div class="scene" id="scene" onclick="flipCard()">
+  <div class="card" id="card">
+    <div class="card-face card-front" id="front-face">
+      <span class="card-category" id="front-cat"></span>
+      <div class="card-question" id="front-q"></div>
+      <div class="card-hint">Clique pour voir la réponse</div>
+    </div>
+    <div class="card-face card-back" id="back-face">
+      <span class="back-category" id="back-cat"></span>
+      <div class="back-title" id="back-title"></div>
+      <div class="back-content" id="back-content"></div>
+    </div>
+  </div>
+</div>
+
+<div class="rating-row" style="width:100%;max-width:620px;margin-bottom:20px" id="rating-row">
+  <button class="btn btn-unknown" onclick="rate(false)">❌ À revoir</button>
+  <button class="btn btn-known" onclick="rate(true)">✅ Je sais !</button>
+</div>
+
+<div class="controls">
+  <button class="btn" onclick="prev()">← Précédent</button>
+  <div class="card-counter" id="counter">1 / 45</div>
+  <button class="btn btn-primary" onclick="next()">Suivant →</button>
+</div>
+
+<div class="score-row">
+  <div class="score-item known"><strong id="s-known">0</strong>Sus</div>
+  <div class="score-item unknown"><strong id="s-unknown">0</strong>À revoir</div>
+  <div class="score-item remain"><strong id="s-remain">45</strong>Restantes</div>
+</div>
+
+<div class="actions-row" style="margin-top:20px">
+  <button class="btn" onclick="shuffle()">🔀 Mélanger</button>
+  <button class="btn" onclick="resetAll()">🔄 Recommencer</button>
+</div>
+
+<script>
+const ALL = [
+  // ─── BACKEND ───
+  {
+    cat: "backend", label: "Backend",
+    q: "Qu'est-ce que Laravel et quel est son rôle dans le projet ?",
+    title: "Laravel 12 — Framework PHP Backend",
+    a: `<strong>Laravel</strong> est un framework PHP open-source qui facilite le développement d'applications web en fournissant des outils prêts à l'emploi.<br><br>
+    <strong>Dans le projet :</strong> il constitue le <em>cerveau du backend</em>. Il gère toutes les règles métier, la communication avec la base de données, la validation des données et l'exposition de l'API REST.<br><br>
+    <ul>
+      <li>Version utilisée : <code>Laravel 12</code> avec PHP 8.2+</li>
+      <li>Il suit le pattern <strong>MVC</strong> (Modèle-Vue-Contrôleur)</li>
+      <li>Il répond aux requêtes HTTP du frontend via des <strong>routes API</strong></li>
+      <li>Il protège les données avec des middlewares et de la validation</li>
+    </ul>`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "C'est quoi une API REST ? Pourquoi l'avoir utilisée ?",
+    title: "API REST — Interface de Communication",
+    a: `Une <strong>API REST</strong> (Application Programming Interface - Representational State Transfer) est un ensemble de règles permettant à deux applications de communiquer via le protocole HTTP.<br><br>
+    <strong>Pourquoi :</strong> Le frontend React et le backend Laravel sont deux applications séparées. L'API REST est le <em>pont de communication</em> entre elles.<br><br>
+    <ul>
+      <li><code>GET /api/products</code> → Récupérer les produits</li>
+      <li><code>POST /api/login</code> → Se connecter</li>
+      <li><code>PATCH /api/vendor/products/{id}</code> → Modifier un produit</li>
+      <li><code>DELETE /api/vendor/products/{id}</code> → Supprimer</li>
+    </ul>
+    <br>Le serveur répond toujours en <strong>JSON</strong>, un format de données universel.`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "C'est quoi le pattern MVC et comment il est appliqué dans le projet ?",
+    title: "MVC — Modèle-Vue-Contrôleur",
+    a: `<strong>MVC</strong> est un patron de conception qui sépare une application en 3 couches :<br><br>
+    <ul>
+      <li><strong>Modèle (M)</strong> → Représente les données. Ex: <code>User.php</code>, <code>Product.php</code>. C'est la couche qui parle à la base de données.</li>
+      <li><strong>Vue (V)</strong> → Ce que voit l'utilisateur. Dans notre cas, c'est le frontend React qui joue ce rôle.</li>
+      <li><strong>Contrôleur (C)</strong> → Le chef d'orchestre. Ex: <code>ProductController.php</code>, <code>AuthController.php</code>. Il reçoit la requête, interroge le Modèle et renvoie une réponse.</li>
+    </ul>
+    <br><em>Avantage :</em> Le code est organisé, chaque partie a une responsabilité claire. On peut modifier l'interface sans toucher la base de données.`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "À quoi sert le ProductController dans le projet ?",
+    title: "ProductController — Gestion des Produits",
+    a: `Le <code>ProductController</code> gère toute la logique liée aux produits.<br><br>
+    <strong>Ses méthodes :</strong>
+    <ul>
+      <li><code>index()</code> → Retourne la liste publique (produits actifs + approuvés, avec pagination)</li>
+      <li><code>show()</code> → Retourne un seul produit via son slug</li>
+      <li><code>manage()</code> → Retourne les produits d'un vendeur connecté (ou tous si Admin)</li>
+      <li><code>store()</code> → Crée un nouveau produit + upload image + génère un slug unique</li>
+      <li><code>update()</code> → Modifie un produit (vérifie que c'est bien le propriétaire)</li>
+      <li><code>destroy()</code> → Supprime un produit</li>
+    </ul>
+    <br><em>Sécurité :</em> avant toute modification, le code vérifie <code>$user->hasRole('Admin') || $product->user_id === $user->id</code>`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "C'est quoi un 'slug' et comment il est généré dans le projet ?",
+    title: "Slug — Identifiant URL Propre",
+    a: `Un <strong>slug</strong> est une version "URL-friendly" d'un texte. Il remplace les espaces par des tirets et supprime les caractères spéciaux.<br><br>
+    <strong>Exemple :</strong> "Téléphone Samsung Galaxy" → <code>telephone-samsung-galaxy</code><br><br>
+    <strong>Dans le projet :</strong> chaque produit a un slug unique utilisé dans l'URL : <code>/produit/telephone-samsung-galaxy</code><br><br>
+    <strong>Comment il est généré :</strong>
+    <ul>
+      <li>Laravel transforme le nom via <code>Str::slug()</code></li>
+      <li>Si le slug existe déjà, un index est ajouté : <code>-2</code>, <code>-3</code>...</li>
+      <li>Cela garantit qu'aucun produit ne partage la même URL</li>
+    </ul>
+    <em>Pourquoi pas l'ID ?</em> Le slug est plus lisible et meilleur pour le référencement (SEO).`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "Qu'est-ce que la validation des données côté backend et pourquoi est-ce important ?",
+    title: "Validation des Données — Laravel Validator",
+    a: `La <strong>validation</strong> consiste à vérifier que les données envoyées par l'utilisateur sont correctes et conformes aux règles avant de les enregistrer.<br><br>
+    <strong>Exemple concret :</strong>
+    <ul>
+      <li><code>'name' => ['required', 'string', 'max:255']</code> → Le nom est obligatoire, textuel, max 255 chars</li>
+      <li><code>'price' => ['required', 'numeric', 'min:0']</code> → Le prix doit être un nombre positif</li>
+      <li><code>'image' => ['nullable', 'image', 'max:5120']</code> → Image optionnelle, max 5 Mo</li>
+      <li><code>'email' => ['required', 'email', 'unique:users,email']</code> → Email valide et unique en base</li>
+    </ul>
+    <br><em>Pourquoi :</em> Sans validation, n'importe qui pourrait envoyer des données corrompues ou malveillantes. C'est la première ligne de défense de l'application.`
+  },
+
+  // ─── SÉCURITÉ ───
+  {
+    cat: "securite", label: "Sécurité",
+    q: "C'est quoi Laravel Sanctum et comment ça sécurise les routes ?",
+    title: "Laravel Sanctum — Authentification par Token",
+    a: `<strong>Sanctum</strong> est le système d'authentification de Laravel pour les API. Il génère des <em>tokens (jetons)</em> qui prouvent l'identité d'un utilisateur sans stocker de session serveur.<br><br>
+    <strong>Comment ça marche :</strong>
+    <ul>
+      <li>L'utilisateur se connecte → le backend génère un token unique</li>
+      <li>Le frontend stocke ce token et l'envoie dans chaque requête : <code>Authorization: Bearer {token}</code></li>
+      <li>Le backend vérifie le token à chaque requête protégée</li>
+      <li>À la déconnexion, le token est supprimé → accès révoqué</li>
+    </ul>
+    <br><strong>Dans les routes :</strong> le middleware <code>auth:sanctum</code> bloque automatiquement les requêtes sans token valide et retourne une erreur <code>401</code>.`
+  },
+  {
+    cat: "securite", label: "Sécurité",
+    q: "C'est quoi Spatie Laravel Permission et pourquoi l'utiliser ?",
+    title: "Spatie Permission — Gestion des Rôles",
+    a: `<strong>Spatie Laravel Permission</strong> est un package qui ajoute un système de <em>rôles et permissions</em> à Laravel. Au lieu de tout coder manuellement, il fournit les outils prêts à l'emploi.<br><br>
+    <strong>Rôles dans le projet :</strong>
+    <ul>
+      <li><code>Client</code> → Consulte le catalogue, contacte les vendeurs</li>
+      <li><code>Vendeur</code> → Gère ses produits</li>
+      <li><code>Admin</code> → Supervise toute la plateforme</li>
+    </ul>
+    <br><strong>Usage concret :</strong>
+    <ul>
+      <li><code>$user->assignRole('Vendeur')</code> → Assigner un rôle</li>
+      <li><code>$user->hasRole('Admin')</code> → Vérifier un rôle</li>
+      <li>Middleware <code>role:Admin</code> → Protéger une route entière</li>
+    </ul>`
+  },
+  {
+    cat: "securite", label: "Sécurité",
+    q: "Qu'est-ce que le hachage du mot de passe et pourquoi on ne stocke jamais un mot de passe en clair ?",
+    title: "Hachage — Sécurité des Mots de Passe",
+    a: `Le <strong>hachage</strong> est une transformation irréversible d'une donnée. Un mot de passe haché ne peut pas être "déhaché" pour retrouver l'original.<br><br>
+    <strong>Dans le projet :</strong> <code>Hash::make($data['password'])</code> — Laravel utilise <strong>bcrypt</strong>, un algorithme de hachage robuste.<br><br>
+    <strong>Pourquoi c'est essentiel :</strong>
+    <ul>
+      <li>Si la base de données est compromise, les mots de passe restent inutilisables</li>
+      <li>Même les développeurs ne peuvent pas lire les mots de passe des utilisateurs</li>
+      <li>Laravel compare avec <code>Hash::check()</code> lors de la connexion</li>
+    </ul>
+    <br><em>Cas concret :</em> "password123" → stocké en base comme <code>$2y$10$xK...</code> (chaîne de 60 chars illisible).`
+  },
+  {
+    cat: "securite", label: "Sécurité",
+    q: "C'est quoi un middleware dans le projet et comment il protège les routes ?",
+    title: "Middleware — Gardien des Routes",
+    a: `Un <strong>middleware</strong> est un composant qui intercepte les requêtes HTTP <em>avant</em> qu'elles n'atteignent le contrôleur. C'est un "filtre" ou un "gardien".<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li><code>auth:sanctum</code> → Vérifie que le token est valide. Sinon → <code>401 Unauthorized</code></li>
+      <li><code>role:Vendeur|Admin</code> → Vérifie que l'utilisateur a le rôle requis. Sinon → <code>403 Forbidden</code></li>
+      <li><code>role:Admin</code> → Réservé aux admins uniquement</li>
+    </ul>
+    <br><strong>Les routes sont donc protégées en couches :</strong> d'abord on vérifie si l'utilisateur est connecté, ensuite si il a les droits nécessaires. Le frontend fait la même vérification via <code>ProtectedRoute</code>.`
+  },
+
+  // ─── FRONTEND ───
+  {
+    cat: "frontend", label: "Frontend",
+    q: "C'est quoi React.js et pourquoi l'avoir choisi ?",
+    title: "React.js — Bibliothèque UI Frontend",
+    a: `<strong>React</strong> est une bibliothèque JavaScript créée par Facebook pour construire des interfaces utilisateur interactives. Elle est basée sur le concept de <em>composants réutilisables</em>.<br><br>
+    <strong>Pourquoi React :</strong>
+    <ul>
+      <li>Permet de créer une <strong>SPA</strong> (Single Page Application) — l'interface se met à jour sans rechargement de page</li>
+      <li>Chaque partie de l'interface est un <em>composant</em> indépendant (Home, Catalog, AdminDashboard...)</li>
+      <li>Le <strong>Virtual DOM</strong> rend les mises à jour ultra-rapides</li>
+      <li>Grande communauté, nombreux outils disponibles</li>
+    </ul>
+    <br><em>Dans le projet :</em> 10 vues distinctes (Home, Catalog, Login, Register, VendorDashboard, AdminDashboard, etc.) + gestion de l'état global avec Context API.`
+  },
+  {
+    cat: "frontend", label: "Frontend",
+    q: "C'est quoi Vite et son rôle dans le projet frontend ?",
+    title: "Vite — Bundler et Serveur de Développement",
+    a: `<strong>Vite</strong> est un outil de construction (bundler) pour applications JavaScript modernes. Il est beaucoup plus rapide que les anciens outils comme Webpack.<br><br>
+    <strong>Ses rôles :</strong>
+    <ul>
+      <li><strong>En développement :</strong> fournit un serveur local ultrarapide avec rechargement instantané (Hot Module Replacement)</li>
+      <li><strong>En production :</strong> compile et optimise tout le code JS/CSS en fichiers optimisés pour le web</li>
+      <li>Configure le proxy API : <code>VITE_API_URL=http://localhost:8000/api</code></li>
+    </ul>
+    <br><em>Commande utilisée :</em> <code>npm run dev</code> pour lancer le serveur Vite sur <code>localhost:5173</code>.`
+  },
+  {
+    cat: "frontend", label: "Frontend",
+    q: "C'est quoi React Router et comment les routes sont protégées dans le projet ?",
+    title: "React Router — Navigation et Protection des Routes",
+    a: `<strong>React Router v6</strong> gère la navigation dans l'application React sans rechargement de page.<br><br>
+    <strong>Routes publiques :</strong> accessibles par tous — <code>/</code>, <code>/catalogue</code>, <code>/login</code>, <code>/register</code><br><br>
+    <strong>Routes protégées :</strong> le composant <code>ProtectedRoute</code> vérifie si l'utilisateur est connecté ET possède le bon rôle. Sinon → redirection vers <code>/login</code>.
+    <ul>
+      <li><code>/vendeur</code> → réservé aux <em>Vendeurs</em></li>
+      <li><code>/administration</code> → réservé aux <em>Admins</em></li>
+      <li><code>/compte</code> → réservé aux <em>Vendeurs et Admins</em></li>
+    </ul>
+    <br><em>Sécurité :</em> la protection est aussi appliquée côté backend (middleware Laravel), donc même si quelqu'un contourne le frontend, l'API refusera la requête.`
+  },
+  {
+    cat: "frontend", label: "Frontend",
+    q: "C'est quoi le Context API (useAuth) et pourquoi l'utiliser ?",
+    title: "Context API — Gestion de l'État Global",
+    a: `Le <strong>Context API</strong> de React permet de partager des données entre tous les composants d'une application sans les "passer" manuellement de composant en composant (ce qu'on appelle le "prop drilling").<br><br>
+    <strong>Dans le projet :</strong> <code>AuthContext</code> stocke et partage :
+    <ul>
+      <li>L'utilisateur connecté (<code>user</code>) — nom, email, rôle</li>
+      <li>Le token d'authentification</li>
+      <li>Les fonctions <code>login()</code> et <code>logout()</code></li>
+    </ul>
+    <br><strong>Usage :</strong> n'importe quel composant peut accéder à <code>const { user, logout } = useAuth()</code> et savoir si l'utilisateur est connecté et quel est son rôle.`
+  },
+  {
+    cat: "frontend", label: "Frontend",
+    q: "Qu'est-ce qu'une SPA (Single Page Application) et en quoi Marché Libre en est une ?",
+    title: "SPA — Single Page Application",
+    a: `Une <strong>SPA</strong> est une application web qui charge une seule page HTML et met à jour dynamiquement son contenu sans rechargement de page.<br><br>
+    <strong>Dans Marché Libre :</strong>
+    <ul>
+      <li>Le fichier <code>index.html</code> est chargé une seule fois</li>
+      <li>React gère toute la navigation : changer de page = changer de composant React</li>
+      <li>Les données sont récupérées via l'API REST (requêtes <code>fetch</code> / <code>axios</code>)</li>
+    </ul>
+    <br><strong>Avantages :</strong>
+    <ul>
+      <li>Navigation instantanée (pas de rechargement)</li>
+      <li>Expérience utilisateur fluide comme une application native</li>
+      <li>Séparation claire entre interface et données</li>
+    </ul>`
+  },
+  {
+    cat: "frontend", label: "Frontend",
+    q: "C'est quoi useMemo et useEffect dans React ? Comment sont-ils utilisés ?",
+    title: "Hooks React — useEffect & useMemo",
+    a: `Les <strong>Hooks</strong> sont des fonctions React spéciales qui ajoutent des fonctionnalités aux composants.<br><br>
+    <strong>useEffect :</strong> Exécute du code en réponse à un événement (montage du composant, changement d'une valeur...).
+    <ul>
+      <li>Dans le projet : appeler l'API pour charger les produits quand la page s'ouvre</li>
+      <li><code>useEffect(() => { loadProducts(); }, [])</code> → se déclenche une fois à l'ouverture</li>
+    </ul>
+    <br><strong>useMemo :</strong> Mémorise le résultat d'un calcul coûteux et ne le recalcule que si les données sources changent.
+    <ul>
+      <li>Dans le projet : filtrer les produits selon la recherche et la catégorie</li>
+      <li>Évite de refiltrer toute la liste à chaque frappe de touche</li>
+    </ul>`
+  },
+
+  // ─── BASE DE DONNÉES ───
+  {
+    cat: "database", label: "Base de données",
+    q: "Quel SGBD est utilisé et comment la base de données est-elle organisée ?",
+    title: "MySQL — Système de Gestion de Base de Données",
+    a: `<strong>MySQL 8.0</strong> est utilisé comme système de gestion de base de données relationnelle (SGBDR).<br><br>
+    <strong>Tables principales :</strong>
+    <ul>
+      <li><code>users</code> → id, name, email, password, vendor_status</li>
+      <li><code>products</code> → id, user_id, name, slug, description, category, price, image_url, whatsapp_number, stock, is_active, publication_status</li>
+      <li><code>roles</code> → id, name (Client / Vendeur / Admin)</li>
+      <li><code>model_has_roles</code> → table pivot reliant users et roles</li>
+      <li><code>personal_access_tokens</code> → les tokens Sanctum</li>
+    </ul>
+    <br><em>La base de données s'appelle</em> <code>marketplace</code> et tourne dans un conteneur Docker séparé.`
+  },
+  {
+    cat: "database", label: "Base de données",
+    q: "C'est quoi une migration Laravel et pourquoi les utiliser ?",
+    title: "Migrations Laravel — Versionnage de la BDD",
+    a: `Une <strong>migration</strong> est un fichier PHP qui décrit comment créer, modifier ou supprimer une table dans la base de données. C'est comme un "historique Git" de la structure de la BDD.<br><br>
+    <strong>Dans le projet :</strong> 10 migrations qui décrivent l'évolution de la base :
+    <ul>
+      <li>Création de la table <code>users</code></li>
+      <li>Création de la table <code>products</code></li>
+      <li>Ajout de <code>whatsapp_number</code> aux produits</li>
+      <li>Ajout de <code>publication_status</code> aux produits</li>
+      <li>Ajout de <code>vendor_status</code> aux utilisateurs</li>
+    </ul>
+    <br><strong>Avantage :</strong> toute l'équipe peut recréer la même base identique en lançant <code>php artisan migrate</code>. Pas besoin d'exporter/importer manuellement du SQL.`
+  },
+  {
+    cat: "database", label: "Base de données",
+    q: "C'est quoi un ORM ? Comment Laravel interagit-il avec la base de données ?",
+    title: "Eloquent ORM — Object-Relational Mapping",
+    a: `Un <strong>ORM</strong> (Object-Relational Mapping) permet de manipuler la base de données en utilisant des objets PHP plutôt qu'en écrivant du SQL brut.<br><br>
+    <strong>Eloquent</strong> est l'ORM intégré à Laravel. Chaque table de base de données correspond à un Modèle PHP.<br><br>
+    <strong>Exemples concrets :</strong>
+    <ul>
+      <li><code>Product::where('is_active', true)->get()</code> → équivaut à <code>SELECT * FROM products WHERE is_active = 1</code></li>
+      <li><code>Product::create([...])</code> → <code>INSERT INTO products (...) VALUES (...)</code></li>
+      <li><code>$product->save()</code> → <code>UPDATE products SET ... WHERE id = ...</code></li>
+    </ul>
+    <br><em>Avantage :</em> le code est plus lisible, plus sûr (protection contre les injections SQL) et plus facile à maintenir.`
+  },
+  {
+    cat: "database", label: "Base de données",
+    q: "C'est quoi le MCD et le MLD ? Quelle est la différence ?",
+    title: "MCD / MLD — Modèles de Données",
+    a: `<strong>MCD (Modèle Conceptuel des Données) :</strong> représentation abstraite des données et de leurs relations, indépendante de tout système informatique. Il utilise des <em>entités</em>, des <em>associations</em> et des <em>cardinalités</em>.
+    <ul>
+      <li>Ex: L'entité USER <em>POSSÈDE</em> l'entité PRODUCT (relation 1,N)</li>
+    </ul>
+    <br><strong>MLD (Modèle Logique des Données) :</strong> traduction du MCD en tables relationnelles, prêtes pour un SGBDR.
+    <ul>
+      <li>Les associations se traduisent en <strong>clés étrangères</strong></li>
+      <li><code>products.user_id</code> référence <code>users.id</code></li>
+    </ul>
+    <br><em>Résumé :</em> MCD = "quoi" (les données et leur sens) → MLD = "comment" (la structure technique en tables).`
+  },
+  {
+    cat: "database", label: "Base de données",
+    q: "Qu'est-ce qu'une clé étrangère (Foreign Key) ? Donner un exemple du projet.",
+    title: "Clé Étrangère — Relation entre Tables",
+    a: `Une <strong>clé étrangère (FK)</strong> est un champ d'une table qui référence la clé primaire d'une autre table. Elle établit le lien entre deux tables liées.<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li>La table <code>products</code> contient le champ <code>user_id</code></li>
+      <li><code>user_id</code> est une FK qui référence <code>users.id</code></li>
+      <li>Cela signifie : "ce produit appartient à cet utilisateur"</li>
+    </ul>
+    <br><strong>En Eloquent :</strong> <code>$product->user()</code> retourne l'utilisateur propriétaire du produit (relation <code>belongsTo</code>).<br><br>
+    <em>Intégrité référentielle :</em> MySQL empêche de supprimer un utilisateur qui a des produits (si la contrainte FK est active), préservant la cohérence des données.`
+  },
+
+  // ─── ARCHITECTURE ───
+  {
+    cat: "archi", label: "Architecture",
+    q: "C'est quoi une architecture découplée (Decoupled) ? Pourquoi le projet l'utilise ?",
+    title: "Architecture Découplée — Frontend ≠ Backend",
+    a: `Une <strong>architecture découplée</strong> (aussi appelée Headless) sépare complètement l'interface utilisateur (frontend) de la logique métier (backend).<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li><em>Frontend React</em> → s'occupe uniquement de l'affichage et de l'interaction</li>
+      <li><em>Backend Laravel</em> → s'occupe uniquement des données et des règles métier</li>
+      <li>Les deux communiquent via l'API REST en JSON</li>
+    </ul>
+    <br><strong>Avantages :</strong>
+    <ul>
+      <li>On peut modifier l'interface sans toucher au backend</li>
+      <li>On pourrait créer une application mobile en utilisant le même backend</li>
+      <li>Meilleure scalabilité : on peut déployer frontend et backend sur des serveurs différents</li>
+    </ul>`
+  },
+  {
+    cat: "archi", label: "Architecture",
+    q: "Quelles sont les routes API du projet et comment sont-elles organisées ?",
+    title: "Routes API — Organisation par Niveau d'Accès",
+    a: `Les routes API sont définies dans <code>backend/routes/api.php</code> et organisées en <strong>3 niveaux de protection</strong> :<br><br>
+    <strong>🌍 Routes publiques :</strong>
+    <ul>
+      <li><code>GET /api/products</code> — Catalogue public</li>
+      <li><code>GET /api/products/{slug}</code> — Fiche produit</li>
+      <li><code>POST /api/register</code> + <code>POST /api/login</code></li>
+    </ul>
+    <strong>🔐 Vendeur ou Admin (auth:sanctum + role):</strong>
+    <ul>
+      <li><code>GET/POST/PATCH/DELETE /api/vendor/products</code></li>
+    </ul>
+    <strong>👑 Admin uniquement :</strong>
+    <ul>
+      <li><code>GET /api/admin/users</code></li>
+      <li><code>PATCH /api/admin/users/{id}/role</code></li>
+      <li><code>PATCH /api/admin/products/{id}/publication</code></li>
+    </ul>`
+  },
+  {
+    cat: "archi", label: "Architecture",
+    q: "C'est quoi le JSON et pourquoi c'est le format d'échange entre frontend et backend ?",
+    title: "JSON — Format d'Échange de Données",
+    a: `<strong>JSON</strong> (JavaScript Object Notation) est un format texte léger pour structurer et échanger des données. Il est lisible par les humains et facilement traitable par les machines.<br><br>
+    <strong>Exemple de réponse de l'API :</strong>
+    <ul>
+      <li><code>{"id": 1, "name": "Téléphone", "price": "25000.00", "stock": 5}</code></li>
+    </ul>
+    <br><strong>Pourquoi JSON :</strong>
+    <ul>
+      <li>Standard universel du web → tous les langages savent le lire</li>
+      <li>Natif en JavaScript → React le traite directement</li>
+      <li>Laravel génère automatiquement du JSON via <code>response()->json()</code></li>
+      <li>Plus léger que XML</li>
+    </ul>`
+  },
+  {
+    cat: "archi", label: "Architecture",
+    q: "C'est quoi les codes HTTP (200, 201, 401, 403, 404) utilisés dans l'API ?",
+    title: "Codes HTTP — Statuts des Réponses API",
+    a: `Les <strong>codes de statut HTTP</strong> indiquent le résultat d'une requête. Le backend les utilise pour communiquer le succès ou l'échec.<br><br>
+    <strong>Codes utilisés dans le projet :</strong>
+    <ul>
+      <li><code>200 OK</code> → Requête réussie (GET, PATCH)</li>
+      <li><code>201 Created</code> → Ressource créée avec succès (POST produit / POST register)</li>
+      <li><code>204 No Content</code> → Succès sans données à retourner (logout)</li>
+      <li><code>401 Unauthorized</code> → Non connecté (token manquant ou invalide)</li>
+      <li><code>403 Forbidden</code> → Connecté mais pas les droits suffisants</li>
+      <li><code>404 Not Found</code> → Ressource introuvable (produit inexistant)</li>
+      <li><code>422 Unprocessable Entity</code> → Données invalides (erreur de validation)</li>
+    </ul>`
+  },
+
+  // ─── DEVOPS ───
+  {
+    cat: "devops", label: "DevOps",
+    q: "C'est quoi Docker et pourquoi l'utiliser dans le projet ?",
+    title: "Docker — Conteneurisation",
+    a: `<strong>Docker</strong> est un outil qui permet de "conteneuriser" une application, c'est-à-dire de l'encapsuler avec tout ce dont elle a besoin (code, dépendances, configuration) dans une unité portable appelée <em>conteneur</em>.<br><br>
+    <strong>Analogie :</strong> un conteneur Docker, c'est comme une boîte hermétique qui contient une mini-machine prête à fonctionner.<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li>Élimine le problème "ça marche sur mon PC" → l'environnement est identique partout</li>
+      <li>3 conteneurs : <code>cs-frontend</code>, <code>cs-backend</code>, <code>cs-db</code></li>
+      <li>Un seul fichier <code>docker-compose.yml</code> lance tout</li>
+    </ul>`
+  },
+  {
+    cat: "devops", label: "DevOps",
+    q: "C'est quoi Docker Compose et comment il orchestre les 3 services du projet ?",
+    title: "Docker Compose — Orchestration Multi-Services",
+    a: `<strong>Docker Compose</strong> est un outil qui permet de définir et lancer plusieurs conteneurs Docker ensemble via un seul fichier <code>docker-compose.yml</code>.<br><br>
+    <strong>Les 3 services du projet :</strong>
+    <ul>
+      <li><code>db</code> → MySQL 8.0, port 3306, stockage persistant via volume</li>
+      <li><code>backend</code> → Laravel PHP, port 8000, dépend de <code>db</code></li>
+      <li><code>frontend</code> → React/Vite, port 5173, reçoit <code>VITE_API_URL</code></li>
+    </ul>
+    <br><strong>Commande de lancement :</strong> <code>docker-compose up -d --build</code><br><br>
+    <em>Réseau interne :</em> les 3 services communiquent entre eux via les noms de service (ex: le backend accède à MySQL via l'host <code>db</code>).`
+  },
+  {
+    cat: "devops", label: "DevOps",
+    q: "C'est quoi un volume Docker et pourquoi en avoir dans le projet ?",
+    title: "Volume Docker — Persistance des Données",
+    a: `Un <strong>volume Docker</strong> est un espace de stockage persistant, géré par Docker, qui survit aux redémarrages et suppressions de conteneurs.<br><br>
+    <strong>Problème sans volume :</strong> si on redémarre le conteneur MySQL, toutes les données en base seraient perdues.<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li><code>dbdata</code> → stocke les données MySQL de manière permanente</li>
+      <li><code>backend_storage</code> → stocke les images uploadées par les vendeurs</li>
+      <li><code>./backend:/var/www</code> → synchronise le code local avec le conteneur (pratique en dev)</li>
+    </ul>
+    <br><em>Résultat :</em> même si le conteneur est stoppé et relancé, les données et les images sont toujours là.`
+  },
+  {
+    cat: "devops", label: "DevOps",
+    q: "C'est quoi GitHub Codespaces et comment est-il configuré dans le projet ?",
+    title: "GitHub Codespaces — Environnement Cloud",
+    a: `<strong>GitHub Codespaces</strong> est un environnement de développement complet hébergé dans le cloud, directement intégré à GitHub. Il permet de lancer et d'utiliser le projet depuis n'importe quel navigateur, sans rien installer sur sa machine.<br><br>
+    <strong>Dans le projet :</strong> le dossier <code>.devcontainer/</code> contient la configuration qui dit à Codespaces comment construire l'environnement (quelle image Docker utiliser, quels ports exposer, quelles commandes exécuter au démarrage).<br><br>
+    <strong>En pratique :</strong>
+    <ul>
+      <li>Clic sur "Create codespace on main" sur GitHub</li>
+      <li>L'environnement se build automatiquement (~2 min)</li>
+      <li>L'application est directement accessible via une URL publique</li>
+    </ul>`
+  },
+  {
+    cat: "devops", label: "DevOps",
+    q: "Qu'est-ce que Composer et npm ? Quelle est leur différence ?",
+    title: "Composer & npm — Gestionnaires de Paquets",
+    a: `Ce sont des <strong>gestionnaires de dépendances</strong> qui automatisent l'installation des bibliothèques tierces utilisées par le projet.<br><br>
+    <strong>Composer</strong> → pour PHP (backend Laravel) :
+    <ul>
+      <li>Fichier de config : <code>composer.json</code></li>
+      <li>Installe Laravel, Sanctum, Spatie, etc.</li>
+      <li>Commande : <code>composer install</code></li>
+    </ul>
+    <br><strong>npm</strong> (Node Package Manager) → pour JavaScript (frontend React) :
+    <ul>
+      <li>Fichier de config : <code>package.json</code></li>
+      <li>Installe React, React Router, Vite, etc.</li>
+      <li>Commandes : <code>npm install</code>, <code>npm run dev</code></li>
+    </ul>`
+  },
+
+  // ─── CONCEPTION ───
+  {
+    cat: "conception", label: "Conception",
+    q: "C'est quoi UML et quels diagrammes ont été produits dans le projet ?",
+    title: "UML — Langage de Modélisation",
+    a: `<strong>UML</strong> (Unified Modeling Language) est un ensemble de notations graphiques standardisées pour modéliser un système logiciel avant de le développer.<br><br>
+    <strong>Les 9 diagrammes du projet :</strong>
+    <ul>
+      <li>📊 <strong>Cas d'utilisation</strong> → Qui fait quoi dans le système</li>
+      <li>🏗️ <strong>Classes</strong> → Structure statique (User, Product et leurs attributs)</li>
+      <li>🔄 <strong>Séquence Connexion</strong> → Flux de la connexion</li>
+      <li>🔄 <strong>Séquence Publication</strong> → Flux de création d'un produit</li>
+      <li>🔄 <strong>Séquence Contact</strong> → Flux du contact WhatsApp</li>
+      <li>⚙️ <strong>Activités</strong> → Flux global d'utilisation</li>
+      <li>🚀 <strong>Déploiement</strong> → Infrastructure technique (Docker)</li>
+      <li>🗄️ <strong>MCD</strong> → Modèle Conceptuel des Données</li>
+      <li>🗄️ <strong>MLD</strong> → Modèle Logique des Données</li>
+    </ul>`
+  },
+  {
+    cat: "conception", label: "Conception",
+    q: "C'est quoi un diagramme de séquence et à quoi sert-il ?",
+    title: "Diagramme de Séquence — Flux Dynamique",
+    a: `Un <strong>diagramme de séquence</strong> UML représente les échanges de messages entre les acteurs et le système dans le temps, pour un scénario précis.<br><br>
+    <strong>Dans le projet, 3 scénarios modélisés :</strong>
+    <ul>
+      <li><strong>Connexion :</strong> Utilisateur → Frontend → API → Validation → Token → Redirection</li>
+      <li><strong>Publication produit :</strong> Vendeur → Formulaire → API → Validation → Upload image → BDD → Confirmation</li>
+      <li><strong>Contact vendeur :</strong> Client → Fiche produit → Construction URL WhatsApp → Ouverture WhatsApp</li>
+    </ul>
+    <br><em>Utilité :</em> visualiser l'ordre des étapes, identifier les échanges entre composants et anticiper les cas d'erreur avant de coder.`
+  },
+  {
+    cat: "conception", label: "Conception",
+    q: "C'est quoi le diagramme de cas d'utilisation (Use Case) ?",
+    title: "Diagramme de Cas d'Utilisation",
+    a: `Le <strong>diagramme de cas d'utilisation</strong> représente les fonctionnalités du système du point de vue de l'utilisateur. Il répond à la question : "Qui peut faire quoi ?".<br><br>
+    <strong>Éléments clés :</strong>
+    <ul>
+      <li><strong>Acteurs :</strong> Client, Vendeur, Administrateur</li>
+      <li><strong>Cas d'utilisation :</strong> Consulter catalogue, Rechercher, Contacter vendeur, Gérer produits, Administrer...</li>
+      <li><strong>Frontières du système :</strong> ce qui est dedans (géré par l'app) vs dehors (WhatsApp)</li>
+    </ul>
+    <br><em>Utilité :</em> c'est le premier diagramme produit, il sert à valider avec le client que toutes les fonctionnalités sont bien identifiées.`
+  },
+  {
+    cat: "conception", label: "Conception",
+    q: "C'est quoi un diagramme de classes et que représente-t-il dans le projet ?",
+    title: "Diagramme de Classes — Structure Statique",
+    a: `Le <strong>diagramme de classes</strong> UML décrit la structure statique du système : les entités (classes), leurs attributs et leurs relations.<br><br>
+    <strong>Classes principales du projet :</strong>
+    <ul>
+      <li><code>User</code> : id, name, email, password, vendor_status + méthodes (login, logout, assignRole)</li>
+      <li><code>Product</code> : id, user_id, name, slug, price, stock, publication_status... + méthodes (create, update, delete)</li>
+      <li><code>Role</code> : id, name (Client / Vendeur / Admin) — depuis Spatie</li>
+    </ul>
+    <br><strong>Relation :</strong> User <em>1..N</em> Product (un utilisateur peut avoir plusieurs produits, chaque produit appartient à un utilisateur).`
+  },
+  {
+    cat: "conception", label: "Conception",
+    q: "C'est quoi le cahier des charges et le cahier d'analyse ? Quelle est la différence ?",
+    title: "CDC vs Cahier d'Analyse — Documents Fondateurs",
+    a: `Ce sont les deux documents de référence qui ont guidé tout le projet.<br><br>
+    <strong>Cahier des Charges (CDC) :</strong>
+    <ul>
+      <li>Document rédigé <em>avant</em> le développement</li>
+      <li>Décrit <em>quoi</em> faire : les fonctionnalités attendues, les contraintes, les acteurs</li>
+      <li>Rédigé du point de vue du client / commanditaire</li>
+      <li>Sert de contrat entre le donneur d'ordre et le développeur</li>
+    </ul>
+    <br><strong>Cahier d'Analyse :</strong>
+    <ul>
+      <li>Document rédigé <em>par les développeurs</em> en réponse au CDC</li>
+      <li>Décrit <em>comment</em> le système va fonctionner : diagrammes UML, modèles de données, architecture</li>
+      <li>C'est la traduction technique du CDC</li>
+    </ul>`
+  },
+
+  // ─── ALGORITHME ───
+  {
+    cat: "algo", label: "Algorithme",
+    q: "C'est quoi l'algorithme de Levenshtein et comment est-il utilisé dans le catalogue ?",
+    title: "Distance de Levenshtein — Recherche Tolérante",
+    a: `La <strong>distance de Levenshtein</strong> mesure le nombre minimal d'opérations (insertion, suppression, substitution) nécessaires pour transformer un mot en un autre.<br><br>
+    <strong>Exemple :</strong> "télefone" → "téléphone" = distance de 1 (1 lettre manquante).<br><br>
+    <strong>Dans le projet :</strong> la fonction <code>isSmartMatch()</code> dans <code>Catalog.jsx</code> utilise cet algorithme pour tolérer les fautes de frappe :
+    <ul>
+      <li>Mot de 4+ caractères → 1 erreur tolérée</li>
+      <li>Mot de 7+ caractères → 2 erreurs tolérées</li>
+      <li>Normalisation des accents avant comparaison</li>
+      <li>Tous les mots de la recherche doivent correspondre</li>
+    </ul>
+    <br><em>Avantage :</em> la recherche fonctionne même si l'utilisateur fait des fautes, sans appel supplémentaire au serveur.`
+  },
+  {
+    cat: "algo", label: "Algorithme",
+    q: "C'est quoi la normalisation des accents dans la recherche et pourquoi est-ce nécessaire ?",
+    title: "Normalisation — Recherche Sans Accents",
+    a: `La <strong>normalisation</strong> consiste à transformer un texte en une forme standardisée pour faciliter les comparaisons.<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li><code>"téléphone".normalize("NFD").replace(/[\\u0300-\\u036f]/g, "")</code></li>
+      <li>→ "telephone" (sans accent, en minuscule)</li>
+    </ul>
+    <br><strong>Pourquoi :</strong>
+    <ul>
+      <li>Un utilisateur peut taper "telephone" ou "téléphone" → les deux donnent le même résultat</li>
+      <li>Évite les faux négatifs dus aux claviers sans accents (smartphones, claviers QWERTY...)</li>
+      <li>Rendu de la recherche équitable quelque soit la façon d'écrire</li>
+    </ul>`
+  },
+  {
+    cat: "algo", label: "Algorithme",
+    q: "C'est quoi la pagination et comment est-elle gérée dans le projet ?",
+    title: "Pagination — Chargement par Pages",
+    a: `La <strong>pagination</strong> consiste à diviser un grand ensemble de données en pages pour ne charger qu'une partie à la fois, améliorant les performances et l'expérience utilisateur.<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li>Le backend pagine via <code>->paginate($perPage)</code> avec un max de 60 produits par page</li>
+      <li>Le frontend catalogue charge jusqu'à 100 produits en une fois pour permettre le filtrage local (Levenshtein)</li>
+      <li>La page d'accueil charge les 12 derniers produits</li>
+    </ul>
+    <br><strong>Réponse paginée Laravel :</strong> <code>{"data": [...], "total": 45, "per_page": 12, "current_page": 1, "last_page": 4}</code>`
+  },
+
+  // ─── INTÉGRATIONS ───
+  {
+    cat: "frontend", label: "Frontend",
+    q: "Comment fonctionne l'intégration WhatsApp dans le projet ?",
+    title: "Intégration WhatsApp — Contact Direct",
+    a: `L'intégration WhatsApp est entièrement <em>côté frontend</em>, sans aucun serveur impliqué.<br><br>
+    <strong>Fonctionnement :</strong>
+    <ul>
+      <li>Le vendeur renseigne son numéro WhatsApp lors de la création d'un produit</li>
+      <li>Le service <code>whatsapp.js</code> construit une URL spéciale</li>
+      <li>Format : <code>https://wa.me/{numero}?text={message_pre_rempli}</code></li>
+      <li>Message pré-rempli : "Bonjour, je souhaite des informations sur {nom_produit}."</li>
+    </ul>
+    <br><strong>Avantages :</strong>
+    <ul>
+      <li>Aucun système de messagerie à maintenir</li>
+      <li>Communication directe entre acheteur et vendeur</li>
+      <li>Adapté aux marchés où WhatsApp est le principal outil de communication</li>
+    </ul>`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "Comment fonctionne l'upload d'image dans le projet ?",
+    title: "Upload de Fichiers — Stockage d'Images",
+    a: `L'upload d'image dans le projet passe par le backend Laravel.<br><br>
+    <strong>Processus :</strong>
+    <ul>
+      <li>Le vendeur sélectionne une image depuis l'interface React</li>
+      <li>L'image est envoyée en <code>multipart/form-data</code> vers <code>POST /api/vendor/products</code></li>
+      <li>Le backend valide : <code>'image' => ['nullable', 'image', 'max:5120']</code> (image réelle, max 5 Mo)</li>
+      <li>L'image est stockée dans le dossier <code>products/</code> via <code>Storage::disk()</code></li>
+      <li>L'URL publique de l'image est enregistrée dans <code>products.image_url</code></li>
+    </ul>
+    <br><em>Si pas d'image :</em> une image par défaut Unsplash est affichée dans l'interface.`
+  },
+  {
+    cat: "securite", label: "Sécurité",
+    q: "C'est quoi la protection CSRF et est-ce qu'elle s'applique dans ce projet ?",
+    title: "CSRF — Cross-Site Request Forgery",
+    a: `<strong>CSRF</strong> est un type d'attaque où un site malveillant force le navigateur d'un utilisateur connecté à faire des requêtes à votre application à son insu.<br><br>
+    <strong>Dans ce projet :</strong> la protection CSRF traditionnelle de Laravel ne s'applique <em>pas</em> aux routes API. C'est intentionnel. Voici pourquoi :<br><br>
+    <ul>
+      <li>Les routes <code>/api/*</code> utilisent l'authentification par <strong>token Sanctum</strong> (Bearer Token dans le header)</li>
+      <li>Un attaquant ne peut pas lire le token stocké dans le localStorage du navigateur depuis un autre domaine</li>
+      <li>La protection CSRF est remplacée par la vérification du token Bearer à chaque requête</li>
+    </ul>
+    <br><em>La protection CSRF s'applique aux applications Laravel "classiques" (avec sessions serveur), pas aux APIs stateless.</em>`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "C'est quoi un 'statut de publication' dans le projet et quelles sont ses valeurs ?",
+    title: "Publication Status — Modération des Produits",
+    a: `Le <code>publication_status</code> est un attribut du modèle <code>Product</code> qui contrôle la visibilité d'un produit dans le catalogue public.<br><br>
+    <strong>Valeurs possibles :</strong>
+    <ul>
+      <li><code>pending</code> → En attente de validation (état initial possible)</li>
+      <li><code>approved</code> → Approuvé et visible dans le catalogue</li>
+      <li><code>rejected</code> → Refusé / masqué du catalogue</li>
+    </ul>
+    <br><strong>Qui peut changer ce statut :</strong> uniquement l'<em>Administrateur</em> via <code>PATCH /api/admin/products/{id}/publication</code><br><br>
+    <em>Dans le code actuel :</em> lors de la création par un vendeur, le statut est automatiquement mis à <code>approved</code>. L'admin peut ensuite le masquer si besoin.`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "C'est quoi le 'vendor_status' et comment ça gère la validation des vendeurs ?",
+    title: "Vendor Status — Validation des Vendeurs",
+    a: `Le <code>vendor_status</code> est un attribut du modèle <code>User</code> qui indique le statut de validation d'un compte vendeur.<br><br>
+    <strong>Valeurs possibles :</strong>
+    <ul>
+      <li><code>null</code> → Utilisateur Client (pas un vendeur)</li>
+      <li><code>pending</code> → Demande en cours de traitement</li>
+      <li><code>approved</code> → Vendeur validé, peut publier des produits</li>
+      <li><code>rejected</code> → Demande refusée</li>
+    </ul>
+    <br><strong>Flux :</strong> L'admin peut changer le statut via <code>PATCH /api/admin/users/{id}/vendor-status</code>. Si approuvé → le rôle Spatie <code>Vendeur</code> est assigné automatiquement. Si rejeté → le rôle repasse à <code>Client</code>.`
+  },
+  {
+    cat: "archi", label: "Architecture",
+    q: "C'est quoi axios et comment le frontend communique avec l'API ?",
+    title: "Axios / Fetch — Requêtes HTTP depuis React",
+    a: `<strong>Axios</strong> est une bibliothèque JavaScript qui simplifie les requêtes HTTP vers une API. Elle gère automatiquement la sérialisation JSON et les headers.<br><br>
+    <strong>Dans le projet :</strong> les services frontend (<code>products.js</code>, <code>management.js</code>) utilisent <code>fetch</code> ou <code>axios</code> pour appeler l'API Laravel.<br><br>
+    <strong>Exemple de requête authentifiée :</strong>
+    <ul>
+      <li>Le token est ajouté automatiquement dans le header : <code>Authorization: Bearer {token}</code></li>
+      <li>Les données sont envoyées en JSON ou <code>multipart/form-data</code> (pour les images)</li>
+      <li>La réponse JSON est automatiquement parsée en objet JavaScript</li>
+    </ul>
+    <br><em>URL de base :</em> <code>VITE_API_URL=http://localhost:8000/api</code> définie dans les variables d'environnement.`
+  },
+  {
+    cat: "conception", label: "Conception",
+    q: "C'est quoi la cardinalité dans un MCD ? Donner un exemple du projet.",
+    title: "Cardinalité — Force des Relations",
+    a: `La <strong>cardinalité</strong> exprime le nombre minimum et maximum d'occurrences d'une entité en relation avec une autre.<br><br>
+    <strong>Notation :</strong> <code>(min, max)</code> ou <code>1,N</code> signifie "au moins 1, au maximum plusieurs".<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li>Relation USER → PRODUCT</li>
+      <li>Côté USER : <code>(0, N)</code> → un utilisateur peut avoir 0 ou plusieurs produits</li>
+      <li>Côté PRODUCT : <code>(1, 1)</code> → un produit appartient à exactement 1 utilisateur</li>
+    </ul>
+    <br><strong>Traduction en SQL :</strong> La table <code>products</code> possède une colonne <code>user_id</code> (clé étrangère) qui référence <code>users.id</code>.`
+  },
+  {
+    cat: "frontend", label: "Frontend",
+    q: "C'est quoi Tailwind CSS et comment est-il utilisé dans le projet ?",
+    title: "Tailwind CSS — Framework de Style Utilitaire",
+    a: `<strong>Tailwind CSS</strong> est un framework CSS utilitaire qui fournit des classes prêtes à l'emploi pour styliser l'interface sans écrire de CSS personnalisé.<br><br>
+    <strong>Principe :</strong> au lieu d'écrire <code>.bouton { background: blue; padding: 8px; }</code>, on écrit directement dans le HTML : <code>class="bg-blue-500 p-2"</code>.<br><br>
+    <strong>Dans le projet :</strong>
+    <ul>
+      <li>Tailwind est utilisé côté frontend React pour la mise en page et les styles de base</li>
+      <li>Le fichier <code>App.css</code> (23 Ko) contient des styles CSS personnalisés complémentaires</li>
+      <li>L'interface est <strong>responsive</strong> grâce aux classes Tailwind comme <code>md:</code>, <code>lg:</code></li>
+    </ul>`
+  },
+  {
+    cat: "backend", label: "Backend",
+    q: "Quel est le rôle de chaque fichier .env dans le projet ?",
+    title: "Fichiers .env — Variables d'Environnement",
+    a: `Les <strong>fichiers .env</strong> stockent les variables de configuration sensibles ou spécifiques à l'environnement, <em>en dehors du code source</em>.<br><br>
+    <strong>Backend <code>backend/.env</code> :</strong>
+    <ul>
+      <li><code>DB_CONNECTION=mysql</code>, <code>DB_HOST=db</code>, <code>DB_DATABASE=marketplace</code></li>
+      <li><code>APP_KEY=...</code> → clé secrète de chiffrement Laravel</li>
+      <li><code>SANCTUM_STATEFUL_DOMAINS</code> → domaines autorisés</li>
+    </ul>
+    <strong>Frontend <code>frontend/.env</code> :</strong>
+    <ul>
+      <li><code>VITE_API_URL=http://localhost:8000/api</code></li>
+    </ul>
+    <br><em>Pourquoi .gitignore :</em> les fichiers .env sont exclus du dépôt Git pour ne pas exposer les mots de passe et clés secrètes publiquement.`
+  },
+  {
+    cat: "devops", label: "DevOps",
+    q: "Qu'est-ce que 'php artisan' et comment il est utilisé dans le projet ?",
+    title: "Artisan — Console de Commandes Laravel",
+    a: `<strong>Artisan</strong> est l'interface en ligne de commande (CLI) intégrée à Laravel. Elle permet d'exécuter des tâches courantes via le terminal.<br><br>
+    <strong>Commandes utilisées dans le projet :</strong>
+    <ul>
+      <li><code>php artisan migrate</code> → Exécute les migrations et crée/modifie les tables</li>
+      <li><code>php artisan key:generate</code> → Génère la clé secrète de l'application</li>
+      <li><code>php artisan serve</code> → Lance le serveur de développement local</li>
+      <li><code>php artisan config:clear</code> → Vide le cache de configuration</li>
+      <li><code>php artisan test</code> → Lance les tests automatisés</li>
+    </ul>
+    <br><em>Analogie :</em> Artisan, c'est l'assistant qui fait le travail répétitif à ta place.`
+  },
+  {
+    cat: "archi", label: "Architecture",
+    q: "C'est quoi la différence entre un GET, POST, PATCH et DELETE en HTTP ?",
+    title: "Méthodes HTTP — CRUD",
+    a: `Les <strong>méthodes HTTP</strong> définissent le type d'action à effectuer sur une ressource. Elles correspondent aux opérations CRUD (Create, Read, Update, Delete).<br><br>
+    <ul>
+      <li><code>GET</code> → <strong>Lire</strong> des données. Ex: <code>GET /api/products</code> → récupérer la liste. Ne modifie rien.</li>
+      <li><code>POST</code> → <strong>Créer</strong> une ressource. Ex: <code>POST /api/vendor/products</code> → créer un produit.</li>
+      <li><code>PATCH</code> → <strong>Modifier partiellement</strong> une ressource. Ex: <code>PATCH /api/vendor/products/{id}</code> → mettre à jour certains champs.</li>
+      <li><code>PUT</code> → Remplacer entièrement une ressource (non utilisé ici).</li>
+      <li><code>DELETE</code> → <strong>Supprimer</strong> une ressource. Ex: <code>DELETE /api/vendor/products/{id}</code></li>
+    </ul>`
+  },
+];
+
+// ── STATE ──
+let deck = [...ALL];
+let current = 0;
+let isFlipped = false;
+let scores = { known: 0, unknown: 0 };
+let rated = new Set();
+let activeFilter = 'all';
+
+// ── CATEGORY CONFIG ──
+const cats = {
+  all:        { label: '🗂️ Tout', cls: '' },
+  backend:    { label: '⚙️ Backend', cls: 'cat-backend' },
+  frontend:   { label: '🎨 Frontend', cls: 'cat-frontend' },
+  database:   { label: '🗄️ Base de données', cls: 'cat-database' },
+  archi:      { label: '🏗️ Architecture', cls: 'cat-archi' },
+  securite:   { label: '🔐 Sécurité', cls: 'cat-securite' },
+  devops:     { label: '🐳 DevOps', cls: 'cat-devops' },
+  conception: { label: '📐 Conception', cls: 'cat-conception' },
+  algo:       { label: '🧮 Algorithme', cls: 'cat-algo' },
+};
+
+// ── INIT ──
+function init() {
+  // Build filters
+  const fEl = document.getElementById('filters');
+  fEl.innerHTML = '';
+  Object.entries(cats).forEach(([key, val]) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (key === activeFilter ? ' active' : '');
+    btn.textContent = val.label;
+    btn.onclick = () => setFilter(key);
+    fEl.appendChild(btn);
+  });
+  render();
+}
+
+function setFilter(key) {
+  activeFilter = key;
+  deck = key === 'all' ? [...ALL] : ALL.filter(c => c.cat === key);
+  current = 0;
+  scores = { known: 0, unknown: 0 };
+  rated = new Set();
+  isFlipped = false;
+  document.getElementById('card').classList.remove('flipped');
+  init();
+}
+
+function render() {
+  if (deck.length === 0) return;
+  const c = deck[current];
+
+  // Front
+  const fCat = document.getElementById('front-cat');
+  fCat.textContent = cats[c.cat]?.label || c.label;
+  fCat.className = 'card-category ' + (cats[c.cat]?.cls || '');
+  document.getElementById('front-q').textContent = c.q;
+
+  // Back
+  const bCat = document.getElementById('back-cat');
+  bCat.textContent = cats[c.cat]?.label || c.label;
+  bCat.className = 'back-category ' + (cats[c.cat]?.cls || '');
+  document.getElementById('back-title').textContent = c.title;
+  document.getElementById('back-content').innerHTML = c.a;
+
+  // Progress
+  const pct = Math.round((current / deck.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `Carte ${current + 1} sur ${deck.length}`;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('counter').textContent = `${current + 1} / ${deck.length}`;
+
+  // Scores
+  document.getElementById('s-known').textContent = scores.known;
+  document.getElementById('s-unknown').textContent = scores.unknown;
+  document.getElementById('s-remain').textContent = deck.length - rated.size;
+
+  // Show/hide rating buttons
+  const rr = document.getElementById('rating-row');
+  rr.style.opacity = isFlipped ? '1' : '0.3';
+  rr.style.pointerEvents = isFlipped ? 'auto' : 'none';
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('card').classList.toggle('flipped', isFlipped);
+  render();
+}
+
+function next() {
+  if (current < deck.length - 1) {
+    current++;
+    isFlipped = false;
+    document.getElementById('card').classList.remove('flipped');
+    render();
+  }
+}
+
+function prev() {
+  if (current > 0) {
+    current--;
+    isFlipped = false;
+    document.getElementById('card').classList.remove('flipped');
+    render();
+  }
+}
+
+function rate(known) {
+  if (!isFlipped) { flipCard(); return; }
+  if (!rated.has(current)) {
+    rated.add(current);
+    if (known) scores.known++;
+    else scores.unknown++;
+  }
+  render();
+  setTimeout(() => next(), 300);
+}
+
+function shuffle() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  current = 0;
+  isFlipped = false;
+  scores = { known: 0, unknown: 0 };
+  rated = new Set();
+  document.getElementById('card').classList.remove('flipped');
+  render();
+}
+
+function resetAll() {
+  scores = { known: 0, unknown: 0 };
+  rated = new Set();
+  current = 0;
+  isFlipped = false;
+  document.getElementById('card').classList.remove('flipped');
+  render();
+}
+
+// keyboard support
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'l') next();
+  if (e.key === 'ArrowLeft' || e.key === 'j') prev();
+  if (e.key === ' ') { e.preventDefault(); flipCard(); }
+  if (e.key === 'y') rate(true);
+  if (e.key === 'n') rate(false);
+});
+
+init();
+</script>
+</body>
+</html>

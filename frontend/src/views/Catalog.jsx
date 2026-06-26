@@ -32,17 +32,9 @@ export default function Catalog() {
 
         const loadProducts = async () => {
             try {
-                const params = {};
-
-                if (initialQuery) {
-                    params.search = initialQuery;
-                }
-
-                if (initialCategory && initialCategory !== 'all') {
-                    params.category = initialCategory;
-                }
-
-                const data = await getProducts(params);
+                // On récupère tout le catalogue une seule fois au chargement
+                // La recherche intelligente Levenshtein se chargera du filtrage en local
+                const data = await getProducts({ per_page: 100 });
                 if (mounted) {
                     setProducts(extractProductItems(data));
                 }
@@ -62,7 +54,7 @@ export default function Catalog() {
         return () => {
             mounted = false;
         };
-    }, [location.search]);
+    }, []); // On ne dépend plus de location.search pour ne pas re-fetcher à chaque fois
 
     // Catégories dynamiques extraites des produits
     const categories = useMemo(() => {

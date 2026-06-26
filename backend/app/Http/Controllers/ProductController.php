@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -19,7 +21,9 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->where('is_active', true)
-            ->where('publication_status', 'approved')
+            ->when(Schema::hasColumn('products', 'publication_status'), function ($query) {
+                $query->where('publication_status', 'approved');
+            })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query
@@ -37,7 +41,12 @@ class ProductController extends Controller
 
     public function show(Product $product): JsonResponse
     {
-        if (! $product->is_active || $product->publication_status !== 'approved') {
+        $isApproved = true;
+        if (Schema::hasColumn('products', 'publication_status')) {
+            $isApproved = $product->publication_status === 'approved';
+        }
+
+        if (! $product->is_active || ! $isApproved) {
             return response()->json(['message' => 'Produit introuvable.'], 404);
         }
 
@@ -50,7 +59,7 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->with('user')
-            ->when(! $user->hasRole('Admin'), fn ($query) => $query->where('user_id', $user->id))
+            ->when(!$user->hasRole('Admin'), fn ($query) => $query->where('user_id', $user->id))
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -75,8 +84,9 @@ class ProductController extends Controller
         $imageUrl = $this->normalizeNullableString($data['image_url'] ?? null);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $imageUrl = asset('storage/'.$path);
+            $disk = config('filesystems.default');
+            $path = $request->file('image')->store('products', $disk);
+            $imageUrl = Storage::disk($disk)->url($path);
         }
 
         $product = Product::create([
@@ -118,8 +128,9 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $product->image_url = asset('storage/'.$path);
+            $disk = config('filesystems.default');
+            $path = $request->file('image')->store('products', $disk);
+            $product->image_url = Storage::disk($disk)->url($path);
         } elseif (array_key_exists('image_url', $data)) {
             $product->image_url = $this->normalizeNullableString($data['image_url']);
         }

@@ -50,20 +50,20 @@ export default function Account() {
                             <p>Gérer les utilisateurs et les produits de la plateforme.</p>
                         </article>
                     )}
-                    {(isAdmin(user) || isVendor(user)) && (
+                    {isVendor(user) && (
                         <>
                         <article className="feature-card soft" style={{ cursor: 'pointer' }} onClick={() => navigate('/vendeur')}>
                             <div className="card-icon">📦</div>
                             <h3>Mes produits</h3>
                             <p>Créez et suivez vos produits dans votre espace vendeur.</p>
                         </article>
-                        <article className="feature-card soft" style={{ cursor: 'pointer' }} onClick={() => navigate('/catalogue')}>
-                            <div className="card-icon">🔎</div>
-                            <h3>Catalogue</h3>
-                            <p>Accédez au catalogue public et parcourez les articles visibles.</p>
-                        </article>
                         </>
                     )}
+                    <article className="feature-card soft" style={{ cursor: 'pointer' }} onClick={() => navigate('/catalogue')}>
+                        <div className="card-icon">🔎</div>
+                        <h3>Catalogue</h3>
+                        <p>Accédez au catalogue public et parcourez les articles visibles.</p>
+                    </article>
                 </section>
 
                 <section className="section-card">
@@ -73,7 +73,7 @@ export default function Account() {
                         Votre session est active. Vous pouvez naviguer sur le site et ouvrir les espaces auxquels vous avez droit.
                     </p>
                     <div className="card-actions" style={{ marginTop: '18px' }}>
-                        {(isVendor(user) || isAdmin(user)) && (
+                        {isVendor(user) && (
                             <Link to="/vendeur" className="hero-secondary-btn">
                                 Aller à l’espace vendeur
                             </Link>

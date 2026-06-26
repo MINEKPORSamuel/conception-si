@@ -41,7 +41,7 @@ function App() {
                             <Route
                                 path="/vendeur"
                                 element={
-                                    <ProtectedRoute roles={['Vendeur', 'Admin']}>
+                                    <ProtectedRoute roles={['Vendeur']}>
                                         <VendorDashboard />
                                     </ProtectedRoute>
                                 }
@@ -49,7 +49,7 @@ function App() {
                             <Route
                                 path="/vendeur/ajouter-produit"
                                 element={
-                                    <ProtectedRoute roles={['Vendeur', 'Admin']}>
+                                    <ProtectedRoute roles={['Vendeur']}>
                                         <AddProduct />
                                     </ProtectedRoute>
                                 }
@@ -57,7 +57,7 @@ function App() {
                             <Route
                                 path="/vendeur/modifier-produit/:id"
                                 element={
-                                    <ProtectedRoute roles={['Vendeur', 'Admin']}>
+                                    <ProtectedRoute roles={['Vendeur']}>
                                         <EditProduct />
                                     </ProtectedRoute>
                                 }

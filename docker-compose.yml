@@ -31,6 +31,8 @@ services:
       DB_USERNAME: root
       DB_PASSWORD: root
     volumes:
+      - ./backend:/var/www
+      - /var/www/vendor
       - backend_storage:/var/www/storage
 
   # React Frontend
@@ -42,8 +44,11 @@ services:
     restart: always
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     environment:
-      VITE_API_URL: http://127.0.0.1:8000/api
+      VITE_API_URL: http://localhost:8000/api
 
 volumes:
   dbdata:

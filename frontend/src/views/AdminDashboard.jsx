@@ -132,9 +132,6 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="topbar-actions">
-                    <Link to="/vendeur" className="pill-link">
-                        Espace vendeur
-                    </Link>
                     <Link to="/compte" className="pill-link">
                         Mon espace
                     </Link>
